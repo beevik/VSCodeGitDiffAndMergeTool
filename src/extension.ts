@@ -73,8 +73,27 @@ export function activate(context: vscode.ExtensionContext) {
 			(targetFile: string) => { return 'Launching merge tool for ' + targetFile; });
 	});
 
+	let diffActiveFileCommand = vscode.commands.registerCommand('gitdiffandmergetool.diffActiveFile', async () => {
+		const activeEditor = vscode.window.activeTextEditor;
+		if (!activeEditor) {
+			vscode.window.showErrorMessage('No active file in editor.');
+			return;
+		}
+
+		// Create a parameter object similar to what SCM provides
+		const param = {
+			resourceUri: activeEditor.document.uri
+		};
+
+		executeOperation(
+			param,
+			(targetFile: string) => { return ['difftool', '-y', 'HEAD', targetFile]; },
+			(targetFile: string) => { return 'Launching diff tool for ' + targetFile; });
+	});
+
 	context.subscriptions.push(mergeCommand);
 	context.subscriptions.push(diffCommand);
+	context.subscriptions.push(diffActiveFileCommand);
 }
 
 // This method is called when your extension is deactivated
